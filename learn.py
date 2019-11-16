@@ -14,6 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+import pandas as pd
 import random
 from datetime import datetime
 
@@ -30,19 +31,39 @@ from sklearn import preprocessing
 from sklearn.linear_model import Perceptron
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.externals.six import StringIO
 import os
 
-vector_size = 132
+vector_size = 672
+dataframe = pd.read_csv('credit.csv', header=0)
 
-X_test, y_test = load_svmlight_file('CC132/test.txt')
-X_test = X_test.toarray()
 
-X, y = load_svmlight_file('CC132/train.txt')
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.5)
+dataset = dataframe.values
+# dataset = dataset.astype('float32')
+X = dataset[:,2:]
+np.nan_to_num(X)
+# print(X[X=='NA'])
+# X[X == 'NA'] = 0
+y = dataset[:,1]
+print(X)
+# print(X[X=='NA'])
+print(y)
 
-X_train = X_train.toarray()
-X_val = X_val.toarray()
+train_size = int(len(dataset) * 0.5)
+val_size = int(len(dataset) * 0.2)
+test_size = int(len(dataset) * 0.3)
+
+print(train_size, val_size, test_size)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=val_size)
+
+print(len(X_train)/len(X) * 100)
+print(len(X_test)/len(X) * 100)
+print(len(X_val)/len(X) * 100)
+
+# X_train = X_train.toarray()
+# X_val = X_val.toarray()
 
 graph = []
 graph2 = []
@@ -65,8 +86,8 @@ def evalOneMax(individual):
         subX_train = np.delete(X_train, mask, axis=1)
         subX_val = np.delete(X_val, mask, axis=1)
 
-        clf  = Perceptron()
-        # clf = LinearDiscriminantAnalysis()
+        # clf  = Perceptron()
+        clf = LinearDiscriminantAnalysis()
         clf.fit(subX_train, y_train)
 
         # predicao do classificador
@@ -85,8 +106,8 @@ def evalOneMax(individual):
 def FinalTest(individual):
 
     print("Testing best individual on the Test Set...")
-    clf  = Perceptron()
-    # clf = LinearDiscriminantAnalysis()
+    # clf  = Perceptron()
+    clf = LinearDiscriminantAnalysis()
 
     clf.fit(X_train, y_train)
 
@@ -102,8 +123,8 @@ def FinalTest(individual):
     subX_train = np.delete(X_train, mask, axis=1)
     subX_test = np.delete(X_test, mask, axis=1)
 
-    clf  = Perceptron()
-    # clf = LinearDiscriminantAnalysis()
+    # clf  = Perceptron()
+    clf = LinearDiscriminantAnalysis()
 
     clf.fit(subX_train, y_train)
 
@@ -265,5 +286,5 @@ def main():
 
 
 if __name__ == "__main__":
-    print('Apenas um modelo, não funcional')
-    # main()
+    # print('Apenas um modelo, não funcional')
+    main()
