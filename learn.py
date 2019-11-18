@@ -20,6 +20,8 @@ from datetime import datetime
 
 import sys
 import matplotlib.pyplot as plt
+import seaborn as sns
+
 from deap import base
 from deap import creator
 from deap import tools
@@ -31,22 +33,60 @@ from sklearn import preprocessing
 from sklearn.linear_model import Perceptron
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
 import os
 
+from sklearn.linear_model import Lasso, LogisticRegression
+from sklearn.feature_selection import SelectFromModel
+from sklearn.preprocessing import StandardScaler
+
+plt.ioff()
+
 vector_size = 672
-dataframe = pd.read_csv('credit.csv', header=0)
+dataframe = pd.read_csv('../credit.csv', header=0)
+dataframe.drop('ID', axis=1, inplace=True)
+
+# dataframe.replace([np.inf, -np.inf], np.nan, inplace=True)
+#
+# no_na_df = dataframe.fillna(-1337)
+#
+# no_na_df.isnull().any().any()
+#
+# heat_map = sns.heatmap(no_na_df)
+# plt.show()
+#
+
+dataframe.describe()
+
+dropped_df = dataframe.dropna(axis='columns').copy()
+
+dropped_df.describe()
+
+# for col in dropped_df.columns:
+#     plt.figure(figsize=(15,8))
+#     a = sns.distplot(dropped_df[col], bins =30)
+#     fig = a.get_figure()
+#     fig.savefig('/tmp/seaborn/{}.png'.format(col))
+#     plt.close()
+#     # break
 
 
-dataset = dataframe.values
+
+# dataset = dataframe.values
+dataset = dropped_df.values
 # dataset = dataset.astype('float32')
-X = dataset[:,2:]
+X = dataset[:,1:]
 np.nan_to_num(X)
 # print(X[X=='NA'])
 # X[X == 'NA'] = 0
-y = dataset[:,1]
+y = dataset[:,0]
 print(X)
 # print(X[X=='NA'])
 print(y)
+
+np.any(np.isnan(X))
+np.any(np.isnan(y))
+
 
 train_size = int(len(dataset) * 0.5)
 val_size = int(len(dataset) * 0.2)
@@ -61,6 +101,14 @@ X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=va
 print(len(X_train)/len(X) * 100)
 print(len(X_test)/len(X) * 100)
 print(len(X_val)/len(X) * 100)
+
+
+scaler = StandardScaler()
+scaler.fit(X_train)
+
+
+
+
 
 # X_train = X_train.toarray()
 # X_val = X_val.toarray()
@@ -175,6 +223,11 @@ def main():
 
         # Evaluate the entire population
         fitnesses = list(map(toolbox.evaluate, pop))
+
+        np.any(np.isnan(pop))
+        np.any(np.isinf(pop))
+
+        len([y for x in pop for y in x])
 
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit
