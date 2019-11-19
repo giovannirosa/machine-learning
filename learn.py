@@ -36,58 +36,29 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 import os
 
-from sklearn.linear_model import Lasso, LogisticRegression
-from sklearn.feature_selection import SelectFromModel
-from sklearn.preprocessing import StandardScaler
-
-plt.ioff()
-
-vector_size = 672
-dataframe = pd.read_csv('../credit.csv', header=0)
-dataframe.drop('ID', axis=1, inplace=True)
-
-# dataframe.replace([np.inf, -np.inf], np.nan, inplace=True)
-#
-# no_na_df = dataframe.fillna(-1337)
-#
-# no_na_df.isnull().any().any()
-#
-# heat_map = sns.heatmap(no_na_df)
-# plt.show()
-#
-
-dataframe.describe()
-
-dropped_df = dataframe.dropna(axis='columns').copy()
-
-dropped_df.describe()
-
-# for col in dropped_df.columns:
-#     plt.figure(figsize=(15,8))
-#     a = sns.distplot(dropped_df[col], bins =30)
-#     fig = a.get_figure()
-#     fig.savefig('/tmp/seaborn/{}.png'.format(col))
-#     plt.close()
-#     # break
-
-
-
-# dataset = dataframe.values
-dataset = dropped_df.values
+vector_size = 197
+print('Opening file...')
+dataframe = pd.read_csv('credit.csv', header=0)
+print('Dropping NA columns...')
+print(dataframe.shape)
+dataframe = dataframe.dropna(axis=1)
+print(dataframe.shape)
+dataset = dataframe.values
 # dataset = dataset.astype('float32')
-X = dataset[:,1:]
-np.nan_to_num(X)
+X = dataset[:,2:]
+
+
+# np.nan_to_num(X)
 # print(X[X=='NA'])
 # X[X == 'NA'] = 0
 y = dataset[:,0]
 print(X)
+print(len(X[0]))
 # print(X[X=='NA'])
 print(y)
+print(len(y))
 
-np.any(np.isnan(X))
-np.any(np.isnan(y))
-
-
+print('Splitting data...')
 train_size = int(len(dataset) * 0.5)
 val_size = int(len(dataset) * 0.2)
 test_size = int(len(dataset) * 0.3)
