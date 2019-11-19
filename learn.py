@@ -33,21 +33,29 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import os
 
-vector_size = 672
+vector_size = 197
+print('Opening file...')
 dataframe = pd.read_csv('credit.csv', header=0)
-
-
+print('Dropping NA columns...')
+print(dataframe.shape)
+dataframe = dataframe.dropna(axis=1)
+print(dataframe.shape)
 dataset = dataframe.values
 # dataset = dataset.astype('float32')
 X = dataset[:,2:]
-np.nan_to_num(X)
+
+
+# np.nan_to_num(X)
 # print(X[X=='NA'])
 # X[X == 'NA'] = 0
 y = dataset[:,1]
 print(X)
+print(len(X[0]))
 # print(X[X=='NA'])
 print(y)
+print(len(y))
 
+print('Splitting data...')
 train_size = int(len(dataset) * 0.5)
 val_size = int(len(dataset) * 0.2)
 test_size = int(len(dataset) * 0.3)
