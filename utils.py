@@ -6,6 +6,8 @@ from sklearn.metrics import precision_recall_fscore_support
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_curve
+from sklearn.ensemble import GradientBoostingClassifier
 
 
 def data_balance(dataframe):
@@ -17,15 +19,27 @@ def data_balance(dataframe):
     # balanced_df.describe()
     return balanced_df
 
+
+threshs = [0.7, 0.8]
+path = 'E:\\User\\faculdade\\trab_final\\scores.txt'
+
+with open(path, 'a+') as f:
+    f.write('\nThreshs: ' + str(threshs) + '\n')
+
 dataframe = pd.read_csv('../credit.csv', header=0)
 dataframe.drop('ID', axis=1, inplace=True)
 
-dropped_df = dataframe.dropna(axis='columns').copy()
-del dataframe
+dropped_df = dataframe.dropna(axis='columns', thresh=len(dataframe)*threshs[0]).copy()
+dropped_df.dropna(axis='rows', thresh=len(dropped_df.columns)*threshs[1], inplace=True)
+dropped_df.fillna(dropped_df.mean(), inplace=True)
+# del dataframe
+
+len(dropped_df)
+len(dropped_df.columns)
 
 balanced_df = data_balance(dropped_df)
-del dropped_df
-
+# del dropped_df
+len(balanced_df)
 
 X = balanced_df.drop('Y', axis=1)
 y = balanced_df['Y']
@@ -56,29 +70,34 @@ def feature_selection():
 #
 # precision_recall_fscore_support(y_test, y_pred)
 
+with open(path, 'a+') as f:
+    dtc = DecisionTreeClassifier()
+    dtc.fit(X_train, y_train)
+    dtc_y_pred = dtc.predict(X_test)
+    dtc_val_pred = dtc.predict(X_val)
+    # print(precision_recall_fscore_support(y_test, dtc_y_pred))
+    pred_score = precision_recall_fscore_support(y_val, dtc_val_pred)
+    f.write('Decision tree f1: ' + str(pred_score) + '\n')
+    print('Decision tree:', pred_score)
 
-dtc = DecisionTreeClassifier()
-dtc.fit(X_train, y_train)
-dtc_y_pred = dtc.predict(X_test)
-dtc_val_pred = dtc.predict(X_val)
-print(precision_recall_fscore_support(y_test, dtc_y_pred))
-print(precision_recall_fscore_support(y_val, dtc_val_pred))
+    rfc = RandomForestClassifier()
+    rfc.fit(X_train, y_train)
+    rfc_y_pred = rfc.predict(X_test)
+    rfc_val_pred = rfc.predict(X_val)
+    # print(precision_recall_fscore_support(y_test, rfc_y_pred))
+    pred_score = precision_recall_fscore_support(y_val, rfc_val_pred)
+    f.write('Random forest f1: ' + str(pred_score) + '\n')
+    print('Random forest:', pred_score)
 
-rfc = RandomForestClassifier()
-rfc.fit(X_train, y_train)
-rfc_y_pred = rfc.predict(X_test)
-rfc_val_pred = rfc.predict(X_val)
-print(precision_recall_fscore_support(y_test, rfc_y_pred))
-print(precision_recall_fscore_support(y_val, rfc_val_pred))
+    gbc = GradientBoostingClassifier()
+    gbc.fit(X_train, y_train)
+    gbc_y_pred = gbc.predict(X_test)
+    gbc_val_pred = gbc.predict(X_val)
+    # print(precision_recall_fscore_support(y_test, gbc_y_pred))
+    pred_score = precision_recall_fscore_support(y_val, gbc_val_pred)
+    f.write('GBC f1: ' + str(pred_score) + '\n')
+    f.write('GBC roc: ' + str(roc_curve(y_test, gbc_y_pred)) + '\n')
+    print('GBC', pred_score)
+    print('Roc: ', roc_curve(y_test, gbc_y_pred))
 
 
-from sklearn.ensemble import GradientBoostingClassifier
-gbc = GradientBoostingClassifier()
-gbc.fit(X_train, y_train)
-gbc_y_pred = gbc.predict(X_test)
-gbc_val_pred = gbc.predict(X_val)
-print(precision_recall_fscore_support(y_test, gbc_y_pred))
-print(precision_recall_fscore_support(y_val, gbc_val_pred))
-
-from sklearn.metrics import roc_curve
-roc_curve(y_test, gbc_y_pred)
